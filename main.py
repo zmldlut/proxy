@@ -2,22 +2,32 @@
 # coding=utf-8
 import requests
 import threading
+import random
+import time
 
 URL_PROXYS = "http://192.168.0.111:5010/get_all"
 
 PROXYS = []
-DST_URL = ["https://www.baidu.com"]
+DST_URL = [
+    "https://www.baidu.com"
+]
 TIME = 60 * 5
+PROXIES_FILE = "./proxies.txt"
 
 def get_proxys(url = URL_PROXYS):
+    
+    f = open(PROXIES_FILE, "w")
+
     r = requests.get(url)
     lines = r.text.split("\n")
     for line in lines:
         if "\"" in line:
             proxy = line.strip()[1:-2]
             PROXYS.append(proxy)
+            f.write(proxy + "\n")
 
     print(PROXYS)
+    f.close()
     return PROXYS
 
 def timer_get_proxys(url = URL_PROXYS, time = 60 * 5):
@@ -39,6 +49,12 @@ def refresh_urls(urls, proxies):
     for url in urls:
         count = 0
         for proxy in proxies:
+            h = random.uniform(0,10)
+            m = random.uniform(0,60)
+            s = random.uniform(0,60)
+            ti = h * 10 + m * 2 + s
+            time.sleep(ti)
+            print(ti)
             try:
                 r = requests.get(url, proxy)
                 if r.status_code == 200:
@@ -57,10 +73,10 @@ def refresh_urls(urls, proxies):
 
 if __name__ == "__main__":
     
+    print("hello world!")
     #timer_get_proxys(URL_PROXYS, TIME)
     get_proxys(URL_PROXYS)
     print(PROXYS)
-    print(get_proxies(PROXYS))
     list_count = refresh_urls(DST_URL, get_proxies(PROXYS))
     print(list_count)
 
