@@ -4,13 +4,12 @@ import requests
 import threading
 import random
 import time
+import selenuim_test
 
 URL_PROXYS = "http://192.168.0.111:5010/get_all"
 
 PROXYS = []
-DST_URL = [
-    "https://www.baidu.com"
-]
+DST_URL = [ "https://www.baidu.com" ]
 TIME = 60 * 5
 PROXIES_FILE = "./proxies.txt"
 
@@ -56,8 +55,9 @@ def refresh_urls(urls, proxies):
             time.sleep(ti)
             print(ti)
             try:
-                r = requests.get(url, proxy)
-                if r.status_code == 200:
+                #r = requests.get(url, proxy)
+                r = selenuim_test.detect_url(proxy, url)
+                if r == 200:
                     count += 1
             except:
                 print(url)
@@ -74,7 +74,11 @@ def refresh_urls(urls, proxies):
 if __name__ == "__main__":
     
     print("hello world!")
+    
+    #每个5分钟获取一次proxys
     #timer_get_proxys(URL_PROXYS, TIME)
+    
+    #单次获取proxys
     get_proxys(URL_PROXYS)
     print(PROXYS)
     list_count = refresh_urls(DST_URL, get_proxies(PROXYS))
