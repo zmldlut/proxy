@@ -21,12 +21,18 @@ business_kw = "专业外墙瓷砖清洗"
 def detect_url(proxy = proxy, se_url = se_url, dst = dst, business_kw = business_kw):
     try:
         #设置代理
-        #firefox_options = options.Options()
-        #firefox_options.add_argument("--proxy-server=" + proxy)
+        ip = proxy.split(":")[0]
+        port = int(proxy.split(":")[1])
+        profile = webdriver.FirefoxProfile()
+        profile.set_preference("network.proxy.type", 1)
+        profile.set_preference("network.proxy.http", ip)
+        profile.set_preference("network.proxy.http_port", port)
+        profile.set_preference("network.proxy.ssl", ip)
+        profile.set_preference("network.proxy.ssl_port", port)
+        profile.update_preferences()
 
         #打开firefox浏览器
-        #driver = webdriver.Firefox(firefox_options = firefox_options)
-        driver = webdriver.Firefox()
+        driver = webdriver.Firefox(profile)
         driver.get(se_url)
         try:
             time.sleep(random.uniform(1,3))

@@ -2,11 +2,8 @@
 # coding=utf-8
 import requests
 import threading
-import random
-import time
 import os
 
-import selenuim_test
 
 URL_PROXYS = "http://127.0.0.1:5010/get_all"
 
@@ -60,10 +57,6 @@ def refresh_urls(proxies):
             print("filed!")
 
     return list_count
-    
-
-#timer = threading.Timer(1, timer_get_proxys, [URL_PROXYS, TIME])
-#timer.start()
 
 if __name__ == "__main__":
     
