@@ -4,14 +4,16 @@ import requests
 import threading
 import random
 import time
+import os
+
 import selenuim_test
 
-URL_PROXYS = "http://192.168.0.111:5010/get_all"
+URL_PROXYS = "http://127.0.0.1:5010/get_all"
 
 PROXYS = []
-DST_URL = [ "https://www.baidu.com" ]
 TIME = 60 * 5
 PROXIES_FILE = "./proxies.txt"
+BUSSINES_KEYS = ["大树", "专业外墙瓷砖清洗"]
 
 def get_proxys(url = URL_PROXYS):
     
@@ -43,27 +45,19 @@ def get_proxies(proxys = PROXYS):
         proxies.append({'http': "http://" + proxy, 'https': "https://" + proxy})
     return proxies
 
-def refresh_urls(urls, proxies):
+def refresh_urls(proxies):
     list_count = []
-    for url in urls:
-        count = 0
-        for proxy in proxies:
-            h = random.uniform(0,10)
-            m = random.uniform(0,60)
-            s = random.uniform(0,60)
-            ti = h * 10 + m * 2 + s
-            time.sleep(ti)
-            print(ti)
-            try:
-                #r = requests.get(url, proxy)
-                r = selenuim_test.detect_url(proxy, url)
-                if r == 200:
-                    count += 1
-            except:
-                print(url)
-                print(proxy)
-                print("filed!")
-        list_count.append(count)
+    for proxy in proxies:
+        try:
+            #r = requests.get(url, proxy)
+            #r = selenuim_test.detect_url(proxy, url)
+            for keys in BUSSINES_KEYS:
+                os.system("python selenuim_test.py -b " + keys + " -p " + proxy )
+            #if r == 200:
+            #    count += 1
+        except:
+            print(proxy)
+            print("filed!")
 
     return list_count
     
@@ -73,15 +67,11 @@ def refresh_urls(urls, proxies):
 
 if __name__ == "__main__":
     
-    print("hello world!")
-    
     #每个5分钟获取一次proxys
     #timer_get_proxys(URL_PROXYS, TIME)
     
     #单次获取proxys
-    get_proxys(URL_PROXYS)
-    print(PROXYS)
-    list_count = refresh_urls(DST_URL, get_proxies(PROXYS))
+    list_count = refresh_urls(get_proxys(URL_PROXYS))
     print(list_count)
 
 
