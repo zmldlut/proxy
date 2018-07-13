@@ -2,13 +2,14 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 import time
 import os
 import shutil
 
 dict = {}
-
+count = 0
 """
 ip = "1.71.188.37"
 port = 3128
@@ -27,8 +28,8 @@ browser.get("https://www.icanhazip.com")
 
 
 profile = webdriver.FirefoxProfile()
-profile['browser.download.dir'] = "/home/zml/cxy"  
-profile['browser.download.folderList'] = 2  
+#profile['browser.download.dir'] = "/home/zml/cxy"  
+#profile['browser.download.folderList'] = 2  
 profile.set_preference('browser.download.manager.showWhenStarting', False)
 profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
 firefox = webdriver.Firefox(firefox_profile=profile)
@@ -49,30 +50,48 @@ except:
     print("不需要登录！")
 
 
-time.sleep(3)
+def down_load(firefox):
 
-form_s = firefox.find_element_by_id("Form1")
-iframes = form_s.find_element_by_tag_name("iframe")
+    time.sleep(3)
+    try:
+        form_s = firefox.find_element_by_id("Form1")
+        iframes = form_s.find_element_by_tag_name("iframe")
+        firefox.switch_to_frame(iframes)
+    except:
+        print("hello")
+    time.sleep(1)
+    table = firefox.find_element_by_class_name("GridTableContent")
+    rows = table.find_elements_by_tag_name("tr")[1:]
+    ta = firefox.find_element_by_class_name("pageBar_bottom")
+    print("ta")
+    print(ta)
 
-firefox.switch_to_frame(iframes)
-table = firefox.find_element_by_class_name("GridTableContent")
-rows = table.find_elements_by_tag_name("tr")[1:]
+    f = open("dict.txt", "a+")
 
-f = open("dict.txt", "w")
+    for row in rows:
+        cols = row.find_elements_by_tag_name("td")
+        title = cols[1].text
+        author = cols[2].text
+        ti = cols[4].text.split("-")[0]
+        dict[author] = time
+        f.write(title + " " + author + " " + ti + "\n")
+        global count
+        count += 1
+        print(str(count) + ": " + title)
+        #row.find_element_by_class_name("briefDl_D").click()
+        time.sleep(1)
 
-
-for row in rows:
-    cols = row.find_elements_by_tag_name("td")
-    title = cols[1].text
-    author = cols[2].text
-    ti = cols[4].text.split("-")[0]
-    dict[author] = time
-    f.write(title + " " + author + " " + ti + "\n")
-    row.find_element_by_class_name("briefDl_D").click()
-    break
-    time.sleep(5)
-
-f.close()
+    f.close()
+    
+    ta = firefox.find_element_by_class_name("pageBar_bottom")
+    links = ta.find_elements_by_tag_name("a")
+    flag = 0
+    for link in links:
+        if link.text == "下一页":
+            flag = 1
+            link.send_keys(Keys.ENTER)
+    return flag
+    
 
 def f(in_dir, out_dir):
     for root, dirs, files in os.walk(in_dir, out_dir):
@@ -91,5 +110,6 @@ def f(in_dir, out_dir):
             file_path = os.path.join(root,file)
             shutil.copy(file_path, out)
 
-
-
+flag = 1
+while flag:
+    flag = down_load(firefox)
