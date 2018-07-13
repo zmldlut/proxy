@@ -1,6 +1,13 @@
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 import time
+import os
+import shutil
+
+dict = {}
 
 """
 ip = "1.71.188.37"
@@ -18,10 +25,16 @@ browser = webdriver.Firefox(profile)
 browser.get("https://www.icanhazip.com")
 """
 
-firefox = webdriver.Firefox()
+
+profile = webdriver.FirefoxProfile()
+profile['browser.download.dir'] = "/home/zml/cxy"  
+profile['browser.download.folderList'] = 2  
+profile.set_preference('browser.download.manager.showWhenStarting', False)
+profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
+firefox = webdriver.Firefox(firefox_profile=profile)
 firefox.get("https://sslvpn.bnu.edu.cn/,DanaInfo=www.cnki.net,SSO=U+")
 
-time.sleep(3)
+time.sleep(1)
 
 try:
     firefox.find_element_by_name("username").send_keys("201731080038")
@@ -35,16 +48,48 @@ try:
 except:
     print("不需要登录！")
 
-table = firefox.find_elment_by_class_name("GridTableContent")
-rows = table.finde_elements_by_tag_name("tr")[1:]
+
+time.sleep(3)
+
+form_s = firefox.find_element_by_id("Form1")
+iframes = form_s.find_element_by_tag_name("iframe")
+
+firefox.switch_to_frame(iframes)
+table = firefox.find_element_by_class_name("GridTableContent")
+rows = table.find_elements_by_tag_name("tr")[1:]
 
 f = open("dict.txt", "w")
 
 
 for row in rows:
     cols = row.find_elements_by_tag_name("td")
-    title = cols[1].getText()
-    author = cols[2].getText()
-    time = cols[4].getText().split("-")[0]
-    f.write(title + " " + author + " " + time + "\n")
-    row.find_element_by_class_name("briefDL_D").click()
+    title = cols[1].text
+    author = cols[2].text
+    ti = cols[4].text.split("-")[0]
+    dict[author] = time
+    f.write(title + " " + author + " " + ti + "\n")
+    row.find_element_by_class_name("briefDl_D").click()
+    break
+    time.sleep(5)
+
+f.close()
+
+def f(in_dir, out_dir):
+    for root, dirs, files in os.walk(in_dir, out_dir):
+        for file in files:
+            author = file.split(",")[0].split("_")[1]
+            out = "其他"
+            for key in dict.keys():
+                if author in key:
+                    out = dict[key]
+
+            out = os.path.join(out_dir, out)
+            if os.path.exists(out):
+                pass
+            else:
+                os.makedirs(out)
+            file_path = os.path.join(root,file)
+            shutil.copy(file_path, out)
+
+
+
